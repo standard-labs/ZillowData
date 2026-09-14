@@ -2,6 +2,9 @@ name: tests
 
 on:
   push:
+    branches:
+      - main
+      - master
     paths-ignore:
       - docs/**/*.*
       - README.md
@@ -9,17 +12,14 @@ on:
       - .github/workflows/deploy-preview.yml
       - .devcontainer/**/*.*
   pull_request:
-    types:  # avoid double runs in open pr
-      - opened
-      - reopened
   workflow_dispatch:
   
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, netcup, zillowdata]
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Inject keys
         run: echo -en '${{ secrets.KEYS_YAML_TESTS }}' >> keys.yaml
