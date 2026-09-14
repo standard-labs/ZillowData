@@ -15,12 +15,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, netcup, zillowdata]
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Inject keys
         run: echo -en '${{ secrets.KEYS_YAML }}' >> keys.yaml
@@ -29,6 +29,9 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
           
       - name: Remove tests directory
         run: rm -r tests
@@ -43,7 +46,7 @@ jobs:
           docker tag zillow-data-collector gcr.io/zillow-test-442918/zillow-data-collector
           docker push gcr.io/zillow-test-442918/zillow-data-collector
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, netcup, zillowdata]
     needs: build
     if: ${{ needs.build.result == 'success' }}
 
@@ -52,6 +55,9 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
           
       - name: Deploy to Cloud Run
         uses: 'google-github-actions/deploy-cloudrun@v2'
